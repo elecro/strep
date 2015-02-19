@@ -31,12 +31,13 @@ from optparse import OptionParser
 
 class Templater(object):
 
-    def __init__(self, filename=None, arguments=None):
+    def __init__(self, filename=None, arguments=None, safe_mode=False):
         if filename:
             self.set_template_file(filename)
         else:
             self.set_template("")
         self._arguments = arguments
+        self._safe_mode = safe_mode
 
     def set_arguments(self, arguments):
         self._arguments = arguments
@@ -51,7 +52,10 @@ class Templater(object):
 
     def get_result(self):
         template_mapping = self._get_template_mapping()
-        return self._template.substitute(template_mapping)
+        if self._safe_mode:
+            return self._template.safe_substitute(template_mapping)
+        else:
+            return self._template.substitute(template_mapping)
 
     def _get_template_mapping(self):
         """ Create a mapping from the input arguments which are in KEY=VALUE form. """
@@ -69,7 +73,9 @@ class Templater(object):
 def process_options():
     parser = OptionParser()
     parser.add_option("-t", "--template", dest="template_file",
-                      help="Input template file")
+                      help="Input template file or '-' if stdin")
+    parser.add_option("-s", "--safe", dest="safe", action="store_true", default=False,
+                      help="Enable safe mode, so no error will be reported on missing input variables")
     parser.add_option("-o", "--output", dest="output",
                       help="Output file (if not specified then the stdout will be used")
 
@@ -109,7 +115,7 @@ def write_result(result, output=None):
 if __name__ == "__main__":
     options, args = process_options()
 
-    templater = Templater(arguments=args)
+    templater = Templater(arguments=args, safe_mode=options.safe)
     if options.is_stdin:
         templater.set_template(sys.stdin.read())
     else:

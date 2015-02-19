@@ -1,9 +1,11 @@
-Simple Template REPlace (STREP)
-========
+# Simple Template REPlace (STREP)
 
 This nifty little tool accepts a template file and
 replaces the variables in it with the given values
 returning the result on the stdout (by default).
+
+
+### A bit more detail
 
 
 In the template file one can use variables in the
@@ -36,3 +38,12 @@ the `-o <output file>` option. Example:
 ```bash
 $ python strep.py -t file.template KEY=VALUE -o file.result
 ```
+
+
+It is also possible to replace only a set of variables with
+the `-s` option. Example:
+```bash
+$ echo '$hello $thing' | python strep.py -s -t - hello=HI
+HI $thing
+```
+
