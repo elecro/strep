@@ -4,16 +4,23 @@ import os
 
 
 if __name__ == "__main__":
+    import sys
     from optparse import OptionParser
 
     parser = OptionParser()
     parser.add_option("-t", "--template", dest="template_file",
                       help="Input template file")
+    parser.add_option("-o", "--output", dest="output",
+                      help="Output file (if not specified then the stdout will be used")
 
     (options, args) = parser.parse_args()
 
+    if not options.template_file:
+        parser.print_help()
+        exit(1)
+
     if not os.path.isfile(options.template_file):
-        sys.stderr.write("Invalid input template file")
+        sys.stderr.write("Invalid input template file: %s" % options.template_file)
         exit(1)
 
     with open(options.template_file) as f:
@@ -31,4 +38,9 @@ if __name__ == "__main__":
     print("-> Using mapping: %s" % str(template_mapping))
     result = template.substitute(template_mapping)
     print("-----\n")
-    print(result)
+
+    if options.output:
+        with open(options.output, "w") as f:
+            f.write(result)
+    else:
+        print(result)
