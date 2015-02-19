@@ -3,6 +3,25 @@ import string
 import os
 
 
+def build_template_mapping(arguments):
+    template_mapping = {}
+
+    for item in args:
+        # item is in the following form:  KEY=VALUE
+        key, value = item.split("=", 1)
+        print("-> %s -> %s" % (key, value))
+        template_mapping[key] = value
+
+    return template_mapping
+
+def template_from_file(filename):
+    """ Create a Template from a given file. """
+    with open(options.template_file) as f:
+        data = f.read()
+
+    return string.Template(data)
+
+
 if __name__ == "__main__":
     import sys
     from optparse import OptionParser
@@ -23,21 +42,9 @@ if __name__ == "__main__":
         sys.stderr.write("Invalid input template file: %s" % options.template_file)
         exit(1)
 
-    with open(options.template_file) as f:
-        data = f.read()
-
-    template = string.Template(data)
-    template_mapping = {}
-
-    for item in args:
-        # item is in the following form:  KEY=VALUE
-        print("-> Current replacer %s" % item)
-        key, value = item.split("=", 1)
-        template_mapping[key] = value
-
-    print("-> Using mapping: %s" % str(template_mapping))
+    template_mapping = build_template_mapping(args)
+    template = template_from_file(options.template_file)
     result = template.substitute(template_mapping)
-    print("-----\n")
 
     if options.output:
         with open(options.output, "w") as f:
