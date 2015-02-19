@@ -2,6 +2,8 @@
 import string
 import os
 
+from optparse import OptionParser
+
 
 def build_template_mapping(arguments):
     template_mapping = {}
@@ -22,10 +24,7 @@ def template_from_file(filename):
     return string.Template(data)
 
 
-if __name__ == "__main__":
-    import sys
-    from optparse import OptionParser
-
+def process_options():
     parser = OptionParser()
     parser.add_option("-t", "--template", dest="template_file",
                       help="Input template file")
@@ -42,12 +41,22 @@ if __name__ == "__main__":
         sys.stderr.write("Invalid input template file: %s" % options.template_file)
         exit(1)
 
-    template_mapping = build_template_mapping(args)
-    template = template_from_file(options.template_file)
-    result = template.substitute(template_mapping)
+    return (options, args)
 
+
+def write_result(result):
     if options.output:
         with open(options.output, "w") as f:
             f.write(result)
     else:
         print(result)
+
+
+if __name__ == "__main__":
+    options, args = process_options()
+
+    template_mapping = build_template_mapping(args)
+    template = template_from_file(options.template_file)
+    result = template.substitute(template_mapping)
+
+    write_result(result)
