@@ -7,13 +7,23 @@ from optparse import OptionParser
 
 class Templater(object):
 
-    def __init__(self, filename, arguments=None):
-        self._filename = filename
-        self._template = self._template_from_file(filename)
+    def __init__(self, filename=None, arguments=None):
+        if filename:
+            self.set_template_file(filename)
+        else:
+            self.set_template("")
         self._arguments = arguments
 
     def set_arguments(self, arguments):
         self._arguments = arguments
+
+    def set_template(self, data):
+        self._filename = None
+        self._template = string.Template(data)
+
+    def set_template_file(self, filename):
+        self._filename = filename
+        self._template = self._template_from_file(filename)
 
     def get_result(self):
         template_mapping = self._get_template_mapping()
@@ -45,7 +55,10 @@ def process_options():
         parser.print_help()
         exit(1)
 
-    if not os.path.isfile(options.template_file):
+    options.is_stdin = (options.template_file == "-")
+
+
+    if not options.is_stdin and not os.path.isfile(options.template_file):
         sys.stderr.write("Invalid input template file: %s" % options.template_file)
         exit(1)
 
@@ -71,5 +84,12 @@ def write_result(result, output=None):
 
 if __name__ == "__main__":
     options, args = process_options()
-    result = Templater(options.template_file, args).get_result()
+
+    templater = Templater(arguments=args)
+    if options.is_stdin:
+        templater.set_template(sys.stdin.read())
+    else:
+        templater.set_template_file(options.template_file)
+
+    result = templater.get_result()
     write_result(result, options.output)
