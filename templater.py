@@ -6,22 +6,14 @@ from optparse import OptionParser
 
 
 def build_template_mapping(arguments):
-    template_mapping = {}
+    """ Create a mapping from the input arguments which are in KEY=VALUE form. """
+    return dict([item.split("=", 1) for item in arguments])
 
-    for item in args:
-        # item is in the following form:  KEY=VALUE
-        key, value = item.split("=", 1)
-        print("-> %s -> %s" % (key, value))
-        template_mapping[key] = value
-
-    return template_mapping
 
 def template_from_file(filename):
     """ Create a Template from a given file. """
     with open(options.template_file) as f:
-        data = f.read()
-
-    return string.Template(data)
+        return string.Template(f.read())
 
 
 def process_options():
